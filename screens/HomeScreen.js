@@ -8,14 +8,14 @@ import {
   Dimensions,
   TouchableOpacity,
   TextInput,
-  Button,
+  ImageBackground,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { fetchMoviesByTitle } from '../services/omdbApi';
 import { debounce } from '../utils/debounce';
 
 const { width } = Dimensions.get('window');
-const ITEM_WIDTH = (width - 48) / 2;
+const ITEM_WIDTH = (width - 64) / 3;
 
 const years = Array.from({ length: 30 }, (_, i) => ({
   label: `${2025 - i}`,
@@ -36,7 +36,6 @@ export default function HomeScreen({ navigation }) {
   const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
-    // Fetch movies with a default search term
     const loadMovies = async () => {
       try {
         const results = await fetchMoviesByTitle('Batman');
@@ -62,7 +61,11 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  const debouncedSearch = useCallback(debounce(handleSearch, 500), [query, selectedYear, selectedCategory]);
+  const debouncedSearch = useCallback(debounce(handleSearch, 500), [
+    query,
+    selectedYear,
+    selectedCategory,
+  ]);
 
   const onChangeText = (text) => {
     setQuery(text);
@@ -87,68 +90,75 @@ export default function HomeScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Search Bar */}
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search movies..."
-        value={query}
-        onChangeText={onChangeText}
-        returnKeyType="search"
-      />
-
-
-      {/* Filters */}
-      <View style={styles.filtersContainer}>
-        <Dropdown
-          style={styles.dropdown}
-          data={years}
-          labelField="label"
-          valueField="value"
-          placeholder="Year"
-          value={selectedYear}
-          onChange={(item) => {
-            setSelectedYear(item.value);
-            handleSearch();
-          }}
+    <ImageBackground
+      source={require('../assets/background-image.jpg')}
+      style={styles.background}
+      blurRadius={10}
+    >
+      <View style={styles.container}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search movies..."
+          value={query}
+          onChangeText={onChangeText}
+          returnKeyType="search"
         />
-        <Dropdown
-          style={styles.dropdown}
-          data={categories}
-          labelField="label"
-          valueField="value"
-          placeholder="Category"
-          value={selectedCategory}
-          onChange={(item) => {
-            setSelectedCategory(item.value);
-            handleSearch();
-          }}
+
+        <View style={styles.filtersContainer}>
+          <Dropdown
+            style={styles.dropdown}
+            data={years}
+            labelField="label"
+            valueField="value"
+            placeholder="Year"
+            value={selectedYear}
+            onChange={(item) => {
+              setSelectedYear(item.value);
+              handleSearch();
+            }}
+          />
+          <Dropdown
+            style={styles.dropdown}
+            data={categories}
+            labelField="label"
+            valueField="value"
+            placeholder="Category"
+            value={selectedCategory}
+            onChange={(item) => {
+              setSelectedCategory(item.value);
+              handleSearch();
+            }}
+          />
+        </View>
+
+        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+          <Text style={styles.searchButtonText}>Search</Text>
+        </TouchableOpacity>
+
+        <FlatList
+          data={movies}
+          keyExtractor={(item) => item.imdbID}
+          renderItem={renderItem}
+          numColumns={3}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
         />
       </View>
-
-    {/* Search Button */}
-    <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-    <Text style={styles.searchButtonText}>Search</Text>
-    </TouchableOpacity>
-
-      {/* Movie Grid */}
-      <FlatList
-        data={movies}
-        keyExtractor={(item) => item.imdbID}
-        renderItem={renderItem}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(0 ,0 ,0 ,0.7)', // semi-transparent overlay
     paddingHorizontal: 16,
     paddingTop: 16,
   },
@@ -159,6 +169,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 8,
     marginBottom: 12,
+    backgroundColor: '#fff',
   },
   filtersContainer: {
     flexDirection: 'row',
@@ -172,6 +183,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
+    backgroundColor: '#fff',
   },
   list: {
     paddingBottom: 16,
@@ -208,8 +220,8 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   searchButton: {
-    backgroundColor: '#4CAF50', // Desired background color
-    borderColor: '#388E3C',     // Desired border color
+    backgroundColor: '#4CAF50',
+    borderColor: '#388E3C',
     borderWidth: 2,
     borderRadius: 8,
     paddingVertical: 10,
@@ -221,5 +233,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
-  },  
+  },
 });
