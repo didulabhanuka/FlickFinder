@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { FavoritesContext } from '../context/FavoritesContext';
@@ -51,6 +52,11 @@ export default function FavoritesScreen() {
   );
 
   return (
+    <ImageBackground
+          source={require('../assets/background-image.jpg')}
+          style={styles.background}
+          blurRadius={10}
+        >
     <View style={styles.container}>
       {favorites.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -68,13 +74,20 @@ export default function FavoritesScreen() {
         />
       )}
     </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: 'rgba(0 ,0 ,0 ,0.7)',
     paddingHorizontal: 16,
     paddingTop: 16,
   },
@@ -87,7 +100,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: ITEM_WIDTH,
-    backgroundColor: '#1c1c1c',
+    backgroundColor: '#f8f8f8',
     borderRadius: 8,
     overflow: 'hidden',
     elevation: 2,
@@ -103,13 +116,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
     paddingHorizontal: 8,
     paddingTop: 8,
   },
   year: {
     fontSize: 14,
-    color: '#ccc',
+    color: '#666',
     paddingHorizontal: 8,
     paddingBottom: 8,
   },

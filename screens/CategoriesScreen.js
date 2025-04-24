@@ -8,6 +8,7 @@ import {
   Dimensions,
   TouchableOpacity,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { fetchMoviesByTitle } from '../services/omdbApi';
@@ -72,6 +73,12 @@ export default function CategoriesScreen({ navigation }) {
   );
 
   return (
+    <ImageBackground
+          source={require('../assets/background-image.jpg')}
+          style={styles.background}
+          blurRadius={10}
+          >
+     
     <View style={styles.container}>
       <View style={styles.dropdownRow}>
         <Dropdown
@@ -112,13 +119,21 @@ export default function CategoriesScreen({ navigation }) {
         />
       )}
     </View>
+    
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: 'rgba(0 ,0 ,0 ,0.7)',
     paddingHorizontal: 16,
     paddingTop: 16,
   },
