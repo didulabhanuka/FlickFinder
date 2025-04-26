@@ -43,7 +43,7 @@ To run the project locally, ensure the following dependencies are installed:
 
 ### Clone the repository:
 ```bash
-git clone https://github.com/didulabhanuka/flickfinder2.git
+git clone https://github.com/didulabhanuka/flickfinder.git
 ```
 
 ### Navigate into the project directory:
