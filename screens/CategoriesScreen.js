@@ -3,18 +3,16 @@ import {
   View,
   Text,
   FlatList,
-  Image,
   StyleSheet,
   Dimensions,
-  TouchableOpacity,
   ActivityIndicator,
   ImageBackground,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { fetchMoviesByTitle } from '../services/omdbApi';
+import MovieCard from '../components/MovieCard'; // <-- Import MovieCard
 
 const { width } = Dimensions.get('window');
-const ITEM_WIDTH = (width - 64) / 3;
 
 const typeOptions = [
   { label: 'Movies', value: 'movie' },
@@ -27,7 +25,6 @@ const categoryOptions = [
   { label: 'Comedy', value: 'comedy' },
   { label: 'Horror', value: 'horror' },
   { label: 'Sci-Fi', value: 'sci-fi' },
-  // Add more categories as needed
 ];
 
 export default function CategoriesScreen({ navigation }) {
@@ -39,10 +36,7 @@ export default function CategoriesScreen({ navigation }) {
   const loadMovies = useCallback(async () => {
     setLoading(true);
     try {
-      const results = await fetchMoviesByTitle(
-        selectedCategory,
-        selectedType
-      );
+      const results = await fetchMoviesByTitle(selectedCategory, selectedType);
       setMovies(results);
     } catch (error) {
       console.error(error.message);
@@ -56,70 +50,58 @@ export default function CategoriesScreen({ navigation }) {
   }, [loadMovies]);
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
+    <MovieCard
+      item={item}
       onPress={() => navigation.navigate('MovieDetails', { imdbID: item.imdbID })}
-    >
-      <Image
-        source={{ uri: item.Poster !== 'N/A' ? item.Poster : 'https://via.placeholder.com/150' }}
-        style={styles.poster}
-        resizeMode="cover"
-      />
-      <Text style={styles.title} numberOfLines={2}>
-        {item.Title}
-      </Text>
-      <Text style={styles.year}>{item.Year}</Text>
-    </TouchableOpacity>
+    />
   );
 
   return (
     <ImageBackground
-          source={require('../assets/background-image.jpg')}
-          style={styles.background}
-          blurRadius={10}
-          >
-     
-    <View style={styles.container}>
-      <View style={styles.dropdownRow}>
-        <Dropdown
-          style={styles.dropdown}
-          data={typeOptions}
-          labelField="label"
-          valueField="value"
-          placeholder="Select Type"
-          value={selectedType}
-          onChange={(item) => {
-            setSelectedType(item.value);
-          }}
-        />
-        <Dropdown
-          style={styles.dropdown}
-          data={categoryOptions}
-          labelField="label"
-          valueField="value"
-          placeholder="Select Category"
-          value={selectedCategory}
-          onChange={(item) => {
-            setSelectedCategory(item.value);
-          }}
-        />
-      </View>
+      source={require('../assets/background-image.jpg')}
+      style={styles.background}
+      blurRadius={10}
+    >
+      <View style={styles.container}>
+        <View style={styles.dropdownRow}>
+          <Dropdown
+            style={styles.dropdown}
+            data={typeOptions}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Type"
+            value={selectedType}
+            onChange={(item) => {
+              setSelectedType(item.value);
+            }}
+          />
+          <Dropdown
+            style={styles.dropdown}
+            data={categoryOptions}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Category"
+            value={selectedCategory}
+            onChange={(item) => {
+              setSelectedCategory(item.value);
+            }}
+          />
+        </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
-      ) : (
-        <FlatList
-          data={movies}
-          keyExtractor={(item) => item.imdbID}
-          renderItem={renderItem}
-          numColumns={3}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
-    </View>
-    
+        {loading ? (
+          <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
+        ) : (
+          <FlatList
+            data={movies}
+            keyExtractor={(item) => item.imdbID}
+            renderItem={renderItem}
+            numColumns={3}
+            columnWrapperStyle={styles.row}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
     </ImageBackground>
   );
 }
@@ -157,32 +139,5 @@ const styles = StyleSheet.create({
   row: {
     justifyContent: 'space-between',
     marginBottom: 16,
-  },
-  card: {
-    width: ITEM_WIDTH,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  poster: {
-    width: '100%',
-    height: ITEM_WIDTH * 1.5,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    paddingHorizontal: 8,
-    paddingTop: 8,
-  },
-  year: {
-    fontSize: 14,
-    color: '#666',
-    paddingHorizontal: 8,
-    paddingBottom: 8,
   },
 });

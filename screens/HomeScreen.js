@@ -3,7 +3,6 @@ import {
   View,
   Text,
   FlatList,
-  Image,
   StyleSheet,
   Dimensions,
   TouchableOpacity,
@@ -13,9 +12,9 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import { fetchMoviesByTitle } from '../services/omdbApi';
 import { debounce } from '../utils/debounce';
+import MovieCard from '../components/MovieCard'; // <-- added import
 
 const { width } = Dimensions.get('window');
-const ITEM_WIDTH = (width - 64) / 3;
 
 const years = Array.from({ length: 30 }, (_, i) => ({
   label: `${2025 - i}`,
@@ -73,20 +72,10 @@ export default function HomeScreen({ navigation }) {
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
+    <MovieCard
+      item={item}
       onPress={() => navigation.navigate('MovieDetails', { imdbID: item.imdbID })}
-    >
-      <Image
-        source={{ uri: item.Poster !== 'N/A' ? item.Poster : 'https://via.placeholder.com/150' }}
-        style={styles.poster}
-        resizeMode="cover"
-      />
-      <Text style={styles.title} numberOfLines={2}>
-        {item.Title}
-      </Text>
-      <Text style={styles.year}>{item.Year}</Text>
-    </TouchableOpacity>
+    />
   );
 
   return (
@@ -158,7 +147,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(0 ,0 ,0 ,0.7)', // semi-transparent overlay
+    backgroundColor: 'rgba(0 ,0 ,0 ,0.7)',
     paddingHorizontal: 16,
     paddingTop: 16,
   },
@@ -191,33 +180,6 @@ const styles = StyleSheet.create({
   row: {
     justifyContent: 'space-between',
     marginBottom: 16,
-  },
-  card: {
-    width: ITEM_WIDTH,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  poster: {
-    width: '100%',
-    height: ITEM_WIDTH * 1.5,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    paddingHorizontal: 8,
-    paddingTop: 8,
-  },
-  year: {
-    fontSize: 14,
-    color: '#666',
-    paddingHorizontal: 8,
-    paddingBottom: 8,
   },
   searchButton: {
     backgroundColor: '#4CAF50',

@@ -3,17 +3,15 @@ import {
   View,
   Text,
   FlatList,
-  Image,
   StyleSheet,
   Dimensions,
-  TouchableOpacity,
   ImageBackground,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { FavoritesContext } from '../context/FavoritesContext';
+import MovieCard from '../components/MovieCard'; // <-- import MovieCard
 
 const { width } = Dimensions.get('window');
-const ITEM_WIDTH = (width - 64) / 3;
 
 export default function FavoritesScreen() {
   const { favorites } = useContext(FavoritesContext);
@@ -21,59 +19,58 @@ export default function FavoritesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      // This will run when the screen is focused
-      // If your favorites are stored in context and updated elsewhere,
-      // this ensures the latest favorites are displayed
+      // Update when focused if needed
     }, [favorites])
   );
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() =>
-        navigation.navigate('MovieDetails', { imdbID: item.imdbID })
-      }
-    >
-      <Image
-        source={{
-          uri:
-            item.Poster !== 'N/A'
-              ? item.Poster
-              : 'https://via.placeholder.com/150',
-        }}
-        style={styles.poster}
-        resizeMode="cover"
+  const formatData = (data, numColumns) => {
+    const numberOfFullRows = Math.floor(data.length / numColumns);
+
+    let numberOfElementsLastRow = data.length - numberOfFullRows * numColumns;
+    while (numberOfElementsLastRow !== numColumns && numberOfElementsLastRow !== 0) {
+      data.push({ empty: true, imdbID: `empty-${Math.random()}` });
+      numberOfElementsLastRow++;
+    }
+
+    return data;
+  };
+
+  const renderItem = ({ item }) => {
+    if (item.empty) {
+      return <View style={[styles.card, { backgroundColor: 'transparent', elevation: 0 }]} />;
+    }
+
+    return (
+      <MovieCard
+        item={item}
+        onPress={() => navigation.navigate('MovieDetails', { imdbID: item.imdbID })}
       />
-      <Text style={styles.title} numberOfLines={2}>
-        {item.Title}
-      </Text>
-      <Text style={styles.year}>{item.Year}</Text>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <ImageBackground
-          source={require('../assets/background-image.jpg')}
-          style={styles.background}
-          blurRadius={10}
-        >
-    <View style={styles.container}>
-      {favorites.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No favorites added yet.</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={favorites}
-          keyExtractor={(item) => item.imdbID}
-          renderItem={renderItem}
-          numColumns={3}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
-    </View>
+      source={require('../assets/background-image.jpg')}
+      style={styles.background}
+      blurRadius={10}
+    >
+      <View style={styles.container}>
+        {favorites.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No favorites added yet.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={formatData([...favorites], 3)}
+            keyExtractor={(item) => item.imdbID}
+            renderItem={renderItem}
+            numColumns={3}
+            columnWrapperStyle={styles.row}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
     </ImageBackground>
   );
 }
@@ -87,7 +84,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(0 ,0 ,0 ,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     paddingHorizontal: 16,
     paddingTop: 16,
   },
@@ -99,31 +96,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   card: {
-    width: ITEM_WIDTH,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  poster: {
-    width: '100%',
-    height: ITEM_WIDTH * 1.5,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    paddingHorizontal: 8,
-    paddingTop: 8,
-  },
-  year: {
-    fontSize: 14,
-    color: '#666',
-    paddingHorizontal: 8,
-    paddingBottom: 8,
+    width: (width - 64) / 3,
+    height: ((width - 64) / 3) * 1.5 + 60, // to match MovieCard height approximately
   },
   emptyContainer: {
     flex: 1,

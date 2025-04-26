@@ -5,8 +5,8 @@ import LottieView from 'lottie-react-native';
 export default function SplashScreen({ navigation }) {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace('Home'); // Navigate to your main screen
-    }, 2500); // Duration of the splash screen in milliseconds
+      navigation.replace('Home'); 
+    }, 2500); 
 
     return () => clearTimeout(timer);
   }, []);
@@ -27,7 +27,7 @@ export default function SplashScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // Background color of the splash screen
+    backgroundColor: '#000', 
     justifyContent: 'center',
     alignItems: 'center',
   },

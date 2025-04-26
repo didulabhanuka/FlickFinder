@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,9 @@ import {
   Dimensions,
   ImageBackground,
   TouchableOpacity,
+  Animated,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { fetchMovieById } from '../services/omdbApi';
 import { FavoritesContext } from '../context/FavoritesContext';
 
@@ -21,6 +23,8 @@ export default function MovieDetailsScreen({ route }) {
   const [loading, setLoading] = useState(true);
 
   const { addToFavorites, removeFromFavorites, isFavorite } = useContext(FavoritesContext);
+
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const loadMovie = async () => {
@@ -36,6 +40,27 @@ export default function MovieDetailsScreen({ route }) {
 
     loadMovie();
   }, [imdbID]);
+
+  const handleFavoriteToggle = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.5,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    if (isFavorite(movie.imdbID)) {
+      removeFromFavorites(movie.imdbID);
+    } else {
+      addToFavorites(movie);
+    }
+  };
 
   if (loading) {
     return (
@@ -53,14 +78,6 @@ export default function MovieDetailsScreen({ route }) {
     );
   }
 
-  const handleFavoriteToggle = () => {
-    if (isFavorite(movie.imdbID)) {
-      removeFromFavorites(movie.imdbID);
-    } else {
-      addToFavorites(movie);
-    }
-  };
-
   return (
     <ImageBackground
       source={{
@@ -71,9 +88,23 @@ export default function MovieDetailsScreen({ route }) {
     >
       <View style={styles.overlay}>
         <ScrollView contentContainerStyle={styles.contentContainer}>
-          <View style={styles.infoSection}>
-            <Text style={styles.title}>{movie.Title}</Text>
-            <Text style={styles.subtitle}>{movie.Year} • {movie.Genre}</Text>
+          <View style={styles.headerRow}>
+            <View style={styles.leftColumn}>
+              <Text style={styles.title}>{movie.Title}</Text>
+              <Text style={styles.subtitle}>{movie.Year} • {movie.Genre}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.favoriteIconContainer}
+              onPress={handleFavoriteToggle}
+            >
+              <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                <Icon
+                  name={isFavorite(movie.imdbID) ? 'favorite' : 'favorite-border'}
+                  size={36}
+                  color={isFavorite(movie.imdbID) ? 'red' : 'white'}
+                />
+              </Animated.View>
+            </TouchableOpacity>
           </View>
           <Image
             source={{
@@ -82,14 +113,6 @@ export default function MovieDetailsScreen({ route }) {
             style={styles.poster}
             resizeMode="cover"
           />
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            onPress={handleFavoriteToggle}
-          >
-            <Text style={styles.favoriteButtonText}>
-              {isFavorite(movie.imdbID) ? 'Remove from Favorites' : 'Add to Favorites'}
-            </Text>
-          </TouchableOpacity>
           <Text style={styles.label}>Director:</Text>
           <Text style={styles.value}>{movie.Director}</Text>
           <Text style={styles.label}>Actors:</Text>
@@ -117,9 +140,15 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: 16,
   },
-  infoSection: {
-    alignItems: 'flex-start',
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
+  },
+  leftColumn: {
+    flex: 1,
+    paddingRight: 8,
   },
   title: {
     fontSize: 26,
@@ -137,19 +166,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignSelf: 'center',
     marginBottom: 20,
-  },
-  favoriteButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  favoriteButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   label: {
     fontSize: 16,
